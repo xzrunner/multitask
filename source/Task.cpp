@@ -1,5 +1,6 @@
 #include "multitask/Task.h"
 #include "multitask/Thread.h"
+#include "multitask/TaskPool.h"
 
 namespace mt
 {
@@ -8,8 +9,9 @@ namespace mt
 /* class Task                                                           */
 /************************************************************************/
 
-Task::Task(unsigned int type) 
+Task::Task(unsigned int type, bool need_result) 
 	: m_type(type)
+	, m_need_result(need_result)
 	, m_next(NULL) 
 {
 }
@@ -96,19 +98,25 @@ void TaskThread::Update()
 
 		m_working_queue.Pop();
 
-		// insert to result
-		int find = false;
-		for (int i = 0, n = m_result_queue.size(); i < n; ++i) {
-			if (m_result_queue[i].first == t->Type()) {
-				m_result_queue[i].second.Push(t);
-				find = true;
-				break;
+		if (t->NeedResult())
+		{
+			int find = false;
+			for (int i = 0, n = m_result_queue.size(); i < n; ++i) {
+				if (m_result_queue[i].first == t->Type()) {
+					m_result_queue[i].second.Push(t);
+					find = true;
+					break;
+				}
+			}
+			if (!find) {
+				TaskQueue q;
+				q.Push(t);
+				m_result_queue.push_back(std::make_pair(t->Type(), q));
 			}
 		}
-		if (!find) {
-			TaskQueue q;
-			q.Push(t);
-			m_result_queue.push_back(std::make_pair(t->Type(), q));
+		else
+		{
+			TaskPool::Instance()->Return(t);
 		}
 
 		t = m_working_queue.Front();

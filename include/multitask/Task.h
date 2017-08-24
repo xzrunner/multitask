@@ -15,18 +15,22 @@ namespace mt
 class Task : private cu::Uncopyable
 {
 public:
-	Task(unsigned int type);
+	Task(unsigned int type, bool need_result);
 	virtual ~Task() {}
 
 	virtual void Run()  = 0;
 	
 	unsigned int Type() const { return m_type; }
 
+	bool NeedResult() const { return m_need_result; }
+
 	void SetNext(Task* next) { m_next = next; }
 	Task* GetNext() { return m_next; }
 
 private:
 	unsigned int m_type;
+
+	bool m_need_result;
 
 	Task* m_next;
 
