@@ -46,6 +46,8 @@ public:
 public:
 	void AddTask(Task* task);
 
+	void Flush();
+
 	void Lock();
 	void Unlock();
 	void GetResult(unsigned int type, Task* tasks[THREAD_NUM]);

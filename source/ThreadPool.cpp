@@ -83,6 +83,45 @@ void DaemonThread::AddTask(Task* task)
 /* class ThreadPool                                                     */
 /************************************************************************/
 
+//////////////////////////////////////////////////////////////////////////
+
+#ifdef _WIN32
+#include <windows.h>
+#elif __MACOSX
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#else
+#include <unistd.h>
+#endif
+
+static inline int 
+get_num_cores() 
+{
+#ifdef _WIN32
+	SYSTEM_INFO sysinfo;
+	GetSystemInfo(&sysinfo);
+	return sysinfo.dwNumberOfProcessors;
+#elif __MACOSX
+	int nm[2];
+	size_t len = 4;
+	uint32_t count;
+
+	nm[0] = CTL_HW; nm[1] = HW_AVAILCPU;
+	sysctl(nm, 2, &count, &len, NULL, 0);
+
+	if(count < 1) {
+		nm[1] = HW_NCPU;
+		sysctl(nm, 2, &count, &len, NULL, 0);
+		if(count < 1) { count = 1; }
+	}
+	return count;
+#else
+	return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 SINGLETON_DEFINITION(ThreadPool)
 
 ThreadPool::ThreadPool()
@@ -105,6 +144,13 @@ void ThreadPool::AddTask(Task* task)
 {
 	if (!AddTaskOnlyFree(task)) {
 		m_daemon->AddTask(task);
+	}
+}
+
+void ThreadPool::Flush()
+{
+	for (int i = 0; i < THREAD_NUM; ++i) {
+		m_threads[i]->Flush();
 	}
 }
 

@@ -18,7 +18,8 @@ public:
 	Task(unsigned int type, bool need_result);
 	virtual ~Task() {}
 
-	virtual void Run()  = 0;
+	virtual void Run() = 0;
+	virtual bool Finish() = 0;
 	
 	unsigned int Type() const { return m_type; }
 
@@ -49,6 +50,9 @@ public:
 
 	void Pop();
 
+	// todo
+	void Flush();
+
 private:
 	Task *m_head, *m_tail;
 
@@ -65,6 +69,7 @@ public:
 	void AddTask(Task* task);
 
 	void Update();
+	void Flush();
 
 	bool EmptyNoLock() { return m_working_queue.Empty(); }
 

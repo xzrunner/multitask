@@ -43,9 +43,45 @@ void TaskQueue::Pop()
 	}
 
 	if (m_head == m_tail) {
+		m_head->SetNext(NULL);
 		m_head = m_tail = NULL;
 	} else {
-		m_head = m_head->GetNext();
+		Task* next = m_head->GetNext();
+		m_head->SetNext(NULL);
+		m_head = next;
+	}
+}
+
+void TaskQueue::Flush()
+{
+	if (!m_head) {
+		return;
+	}
+
+	Task* prev = NULL;
+	Task* curr = m_head;
+	Task* next = curr->GetNext();
+	while (curr) 
+	{
+		if (curr->Finish()) 
+		{
+			if (prev) {
+				prev->SetNext(next);
+			}
+			if (m_head == curr) {
+				m_head = next;
+			}
+			if (m_tail == curr) {
+				m_tail = prev;
+			}
+			delete curr;
+		} 
+		else 
+		{
+			prev = curr;
+		}
+		curr = next;
+		next = curr ? curr->GetNext() : NULL;
 	}
 }
 
@@ -120,6 +156,15 @@ void TaskThread::Update()
 		}
 
 		t = m_working_queue.Front();
+	}
+}
+
+void TaskThread::Flush()
+{
+	mt::Lock lock(m_mutex);
+
+	for (int i = 0, n = m_result_queue.size(); i < n; ++i) {
+		m_result_queue[i].second.Flush();
 	}
 }
 

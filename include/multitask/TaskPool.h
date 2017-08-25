@@ -23,6 +23,7 @@ public:
 			m_update_cb(m_arg);
 		}
 	}
+	virtual bool Finish() { return true; }
 
 	void SetUpdateCB(void (*update_cb)(void*), void* arg) {
 		m_update_cb = update_cb;
