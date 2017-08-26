@@ -82,6 +82,8 @@ public:
 	Thread(void* (*main)(void*), void* arg);
 	~Thread();
 
+	static void Delay(unsigned int ms);
+
 private:
 	pthread_t m_thread;
 
