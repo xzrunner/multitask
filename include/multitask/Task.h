@@ -4,6 +4,7 @@
 #include "multitask/Thread.h"
 
 #include <CU_Uncopyable.h>
+#include <CU_RefCountObj.h>
 
 #include <vector>
 
@@ -12,18 +13,15 @@
 namespace mt
 {
 
-class Task : private cu::Uncopyable
+class Task : private cu::Uncopyable, public cu::RefCountObj
 {
 public:
-	Task(unsigned int type, bool need_result);
+	Task(unsigned int type);
 	virtual ~Task() {}
 
 	virtual void Run() = 0;
-	virtual bool Finish() = 0;
 	
 	unsigned int Type() const { return m_type; }
-
-	bool NeedResult() const { return m_need_result; }
 
 	void SetNext(Task* next) { m_next = next; }
 	Task* GetNext() { return m_next; }
@@ -31,13 +29,11 @@ public:
 private:
 	unsigned int m_type;
 
-	bool m_need_result;
-
 	Task* m_next;
 
 }; // Task
 
-class TaskQueue
+class TaskQueue : private cu::Uncopyable
 {
 public:
 	TaskQueue();
@@ -50,57 +46,27 @@ public:
 
 	void Pop();
 
-	// todo
-	void Flush();
-
 private:
 	Task *m_head, *m_tail;
 
 }; // Task
 
 class Mutex;
-class Thread;
-class TaskThread : private cu::Uncopyable
+class SafeTaskQueue : private cu::Uncopyable
 {
 public:
-	TaskThread();
-	virtual ~TaskThread();
-
-	void AddTask(Task* task);
-
-	void Update();
-	void Flush();
-
-	bool EmptyNoLock() { return m_working_queue.Empty(); }
-
-	unsigned int GetDelay() const { return m_delay_ms; }
-
-	void Lock() { m_mutex->Lock(); }
-	void Unlock() { m_mutex->Unlock(); }
-
-	Task* GetResult(unsigned int type);
-
-	void ClearWorking();
-	void ClearResult();
-
-private:
-	void ClearQueueNoLock(TaskQueue& queue);
-
-private:
-	static const unsigned int DEFAULT_DELAY = 5;
+	SafeTaskQueue();
+	~SafeTaskQueue();
+	
+ 	void Push(Task* task);
+ 	Task* TryPop();
 
 private:
 	Mutex* m_mutex;
-	Thread* m_thread;
 
-	TaskQueue m_working_queue;
+	Task *m_head, *m_tail;
 
-	// todo hash
-	std::vector<std::pair<unsigned int, TaskQueue> > m_result_queue;
-
-	unsigned int m_delay_ms;
-
-}; // TaskThread
+}; // SafeTaskQueue
 
 }
 

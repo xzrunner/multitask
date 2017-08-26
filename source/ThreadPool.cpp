@@ -1,90 +1,7 @@
 #include "multitask/ThreadPool.h"
-#include "multitask/Task.h"
+#include "multitask/Thread.h"
 
-namespace mt
-{
-
-/************************************************************************/
-/* class DaemonThread                                                   */
-/************************************************************************/
-
-static void* 
-daemon_thread_loop(void* arg)
-{
-	DaemonThread* daemon = static_cast<DaemonThread*>(arg);
-	while (true)
-	{
-		daemon->Update();
-		Thread::Delay(5);
-	}
-}
-
-DaemonThread::DaemonThread(ThreadPool* pool)
-	: m_pool(pool)
-{
-	m_mutex  = new Mutex();
-	m_thread = new Thread(daemon_thread_loop, this);
-}
-
-DaemonThread::~DaemonThread()
-{
-	delete m_mutex;
-	delete m_thread;
-}
-
-void DaemonThread::Update()
-{
-	mt::Lock lock(m_mutex);
-
-	for (int i = 0, n = m_update_cb.size(); i < n; ++i) {
-		m_update_cb[i].first(m_update_cb[i].second);
-	}
-
-	if (m_tasks.Empty()) {
-		return;
-	}
-
-	Task* task = m_tasks.Front();
-	if (m_pool->AddTaskOnlyFree(task)) {
-		m_tasks.Pop();
-	}
-}
-
-void DaemonThread::RegisterUpdateCB(void (*update)(void* arg), void* arg)
-{
-	mt::Lock lock(m_mutex);
-
-	m_update_cb.push_back(std::make_pair(update, arg));
-}
-
-void DaemonThread::UnregisterUpdateCB(void (*update)(void* arg))
-{
-	mt::Lock lock(m_mutex);
-
-	std::vector<std::pair<void (*)(void*), void*> >::iterator itr
-		= m_update_cb.begin();
-	for ( ; itr != m_update_cb.end(); ) {
-		if (itr->first == update) {
-			itr = m_update_cb.erase(itr);
-		} else {
-			++itr;
-		}
-	}
-}
-
-void DaemonThread::AddTask(Task* task)
-{
-	mt::Lock lock(m_mutex);
-
-	m_tasks.Push(task);
-}
-
-/************************************************************************/
-/* class ThreadPool                                                     */
-/************************************************************************/
-
-//////////////////////////////////////////////////////////////////////////
-
+// get_num_cores()
 #ifdef _WIN32
 #include <windows.h>
 #elif __MACOSX
@@ -93,6 +10,21 @@ void DaemonThread::AddTask(Task* task)
 #else
 #include <unistd.h>
 #endif
+
+namespace mt
+{
+
+ThreadPool::ThreadPool()
+{
+	InitThreads();
+}
+
+ThreadPool::~ThreadPool()
+{
+	for (int i = 0, n = m_threads.size(); i < n; ++i) {
+		delete m_threads[i];
+	}
+}
 
 static inline int 
 get_num_cores() 
@@ -120,70 +52,28 @@ get_num_cores()
 #endif
 }
 
-//////////////////////////////////////////////////////////////////////////
-
-SINGLETON_DEFINITION(ThreadPool)
-
-ThreadPool::ThreadPool()
+static void*
+thread_loop(void* arg)
 {
-	m_daemon = new DaemonThread(this);
-	for (int i = 0; i < THREAD_NUM; ++i) {
-		m_threads[i] = new TaskThread();
-	}
-}
-
-ThreadPool::~ThreadPool()
-{
-	delete m_daemon;
-	for (int i = 0; i < THREAD_NUM; ++i) {
-		delete m_threads[i];
-	}
-}
-
-void ThreadPool::AddTask(Task* task)
-{
-	if (!AddTaskOnlyFree(task)) {
-		m_daemon->AddTask(task);
-	}
-}
-
-void ThreadPool::Flush()
-{
-	for (int i = 0; i < THREAD_NUM; ++i) {
-		m_threads[i]->Flush();
-	}
-}
-
-void ThreadPool::Lock()
-{
-	for (int i = 0; i < THREAD_NUM; ++i) {
-		m_threads[i]->Lock();
-	}
-}
-
-void ThreadPool::Unlock()
-{
-	for (int i = 0; i < THREAD_NUM; ++i) {
-		m_threads[i]->Unlock();
-	}
-}
-
-void ThreadPool::GetResult(unsigned int type, Task* tasks[THREAD_NUM])
-{
-	for (int i = 0; i < THREAD_NUM; ++i) {
-		tasks[i] = m_threads[i]->GetResult(type);
-	}
-}
-
-bool ThreadPool::AddTaskOnlyFree(Task* task)
-{
-	for (int i = 0; i < THREAD_NUM; ++i) {
-		if (m_threads[i]->EmptyNoLock()) {
-			m_threads[i]->AddTask(task);
-			return true;
+	ThreadPool* pool = static_cast<ThreadPool*>(arg);
+	while (true)
+	{
+		Task* task = pool->Fetch();
+		if (task) {
+//			printf("++++++++++++++++ thread run %d\n", pthread_self());
+			task->Run();
+		} else {
+			Thread::Delay(5);
 		}
 	}
-	return false;
+}
+
+void ThreadPool::InitThreads()
+{
+	int num_cores = get_num_cores();
+	for (int i = 0; i < num_cores; ++i) {
+		m_threads.push_back(new Thread(thread_loop, this));		
+	}
 }
 
 }

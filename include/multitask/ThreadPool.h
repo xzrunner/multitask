@@ -3,73 +3,31 @@
 
 #include "multitask/Task.h"
 
-#include <CU_Singleton.h>
 #include <CU_Uncopyable.h>
 
 namespace mt
 {
 
-class Task;
-class TaskThread;
-class Thread;
-class ThreadPool;
-
-class DaemonThread : private cu::Uncopyable
+class ThreadPool : private cu::Uncopyable
 {
 public:
-	DaemonThread(ThreadPool* pool);
-	~DaemonThread();
+	ThreadPool();
+	~ThreadPool();
 
-	void Update();
-	void RegisterUpdateCB(void (*update)(void* arg), void* arg);
-	void UnregisterUpdateCB(void (*update)(void* arg));
-
-	void AddTask(Task* task);
-
-private:
-	ThreadPool* m_pool;
-
-	Mutex*  m_mutex;
-	Thread* m_thread;
-
-	TaskQueue m_tasks;
-
-	std::vector<std::pair<void (*)(void*), void*> > m_update_cb;
-
-}; // DaemonThread
-
-class ThreadPool
-{
-public:
-	static const int THREAD_NUM = 4;
-
-public:
-	void AddTask(Task* task);
-
-	void Flush();
-
-	void Lock();
-	void Unlock();
-	void GetResult(unsigned int type, Task* tasks[THREAD_NUM]);
-
-	void RegisterUpdateCB(void (*update)(void* arg), void* arg) {
-		m_daemon->RegisterUpdateCB(update, arg);
+	void Submit(Task* task) {
+		m_work_queue.Push(task);
 	}
-	void UnregisterUpdateCB(void (*update)(void* arg)) {
-		m_daemon->UnregisterUpdateCB(update);
+	Task* Fetch() {
+		return m_work_queue.TryPop();
 	}
 
 private:
-	bool AddTaskOnlyFree(Task* task);
+	void InitThreads();
 
 private:
-	DaemonThread* m_daemon;
+	SafeTaskQueue m_work_queue;
 
-	TaskThread* m_threads[THREAD_NUM];
-
-	friend class DaemonThread;
-
-	SINGLETON_DECLARATION(ThreadPool)
+	std::vector<Thread*> m_threads;
 
 }; // ThreadPool
 
