@@ -56,13 +56,12 @@ class SafeTaskQueue : private cu::Uncopyable
 {
 public:
 	SafeTaskQueue();
-	~SafeTaskQueue();
 	
  	void Push(Task* task);
  	Task* TryPop();
 
 private:
-	Mutex* m_mutex;
+	Mutex m_mutex;
 
 	Task *m_head, *m_tail;
 

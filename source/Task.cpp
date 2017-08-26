@@ -65,12 +65,6 @@ SafeTaskQueue::SafeTaskQueue()
 	: m_head(NULL)
 	, m_tail(NULL)
 {
-	m_mutex = new Mutex();
-}
-
-SafeTaskQueue::~SafeTaskQueue()
-{
-	delete m_mutex;
 }
 
 void SafeTaskQueue::Push(Task* task)

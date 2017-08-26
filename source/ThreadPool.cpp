@@ -1,79 +1,117 @@
 #include "multitask/ThreadPool.h"
 #include "multitask/Thread.h"
+#include "multitask/Task.h"
 
-// get_num_cores()
-#ifdef _WIN32
-#include <windows.h>
-#elif __MACOSX
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#else
-#include <unistd.h>
-#endif
+#include <assert.h>
 
 namespace mt
 {
 
 ThreadPool::ThreadPool()
+	: m_mutex()
+	, m_not_empty(m_mutex)
+	, m_not_full(m_mutex)
+	, m_max_queue_size(0)
+	, m_running(false)
 {
-	InitThreads();
 }
 
 ThreadPool::~ThreadPool()
 {
-	for (int i = 0, n = m_threads.size(); i < n; ++i) {
-		delete m_threads[i];
+	if (m_running) {
+		Stop();
 	}
 }
 
-static inline int 
-get_num_cores() 
+void ThreadPool::Run(Task* task)
 {
-#ifdef _WIN32
-	SYSTEM_INFO sysinfo;
-	GetSystemInfo(&sysinfo);
-	return sysinfo.dwNumberOfProcessors;
-#elif __MACOSX
-	int nm[2];
-	size_t len = 4;
-	uint32_t count;
+	if (m_threads.empty()) 
+	{
+		task->Run();
+	} 
+	else 
+	{
+		mt::Lock lock(m_mutex);
 
-	nm[0] = CTL_HW; nm[1] = HW_AVAILCPU;
-	sysctl(nm, 2, &count, &len, NULL, 0);
+		while (IsFull()) {
+			m_not_full.Wait();
+		}
+		assert(!IsFull());
 
-	if(count < 1) {
-		nm[1] = HW_NCPU;
-		sysctl(nm, 2, &count, &len, NULL, 0);
-		if(count < 1) { count = 1; }
+		task->AddReference();
+		m_queue.push_back(task);
+
+		m_not_empty.Notify();
 	}
-	return count;
-#else
-	return sysconf(_SC_NPROCESSORS_ONLN);
-#endif
+}
+
+Task* ThreadPool::Take()
+{
+	mt::Lock lock(m_mutex);
+
+	while (m_queue.empty() && m_running) {
+		m_not_empty.Wait();
+	}
+	
+	Task* task = NULL;
+	if (!m_queue.empty()) 
+	{
+		task = m_queue.front();
+		m_queue.pop_front();
+
+		task->RemoveReference();
+		if (m_max_queue_size > 0) {
+			m_not_full.Notify();
+		}
+	}
+	return task;
 }
 
 static void*
 thread_loop(void* arg)
 {
 	ThreadPool* pool = static_cast<ThreadPool*>(arg);
-	while (true)
+	while (pool->IsRunning())
 	{
-		Task* task = pool->Fetch();
+		Task* task = pool->Take();
 		if (task) {
-//			printf("++++++++++++++++ thread run %d\n", pthread_self());
 			task->Run();
-		} else {
-			Thread::Delay(5);
 		}
+	}
+	return NULL;
+}
+
+void ThreadPool::Start(int num_threads)
+{
+	assert(m_threads.empty());
+	m_running = true;
+	m_threads.reserve(num_threads);
+	for (int i = 0; i < num_threads; ++i) {
+		m_threads.push_back(new Thread(thread_loop, this));
 	}
 }
 
-void ThreadPool::InitThreads()
+void ThreadPool::Stop()
 {
-	int num_cores = get_num_cores();
-	for (int i = 0; i < num_cores; ++i) {
-		m_threads.push_back(new Thread(thread_loop, this));		
+	{
+		mt::Lock lock(m_mutex);
+		m_running = false;
+		m_not_empty.NotifyAll();
 	}
+	for (int i = 0, n = m_threads.size(); i < n; ++i) {
+		delete m_threads[i];
+	}
+}
+
+size_t ThreadPool::QueueSize()
+{
+	mt::Lock lock(m_mutex);
+	return m_queue.size();
+}
+
+bool ThreadPool::IsFull() const
+{	
+	return m_max_queue_size > 0 && m_queue.size() >= m_max_queue_size;
 }
 
 }
