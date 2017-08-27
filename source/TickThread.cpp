@@ -20,7 +20,7 @@ tick_thread_loop(void* arg)
 TickThread::TickThread(ThreadPool* pool)
 	: m_pool(pool)
 	, m_thread(NULL)
-	, m_running(false)
+	, m_running(true)
 {
 	m_thread = new Thread(tick_thread_loop, this);
 }
