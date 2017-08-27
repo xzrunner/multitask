@@ -18,6 +18,8 @@ public:
 	TickThread(ThreadPool* pool);
 	~TickThread();
 
+	bool IsRunning() const { return m_running; }
+
 	void Run();
 
 	void RegisterUpdateCB(void (*update)(void* arg), void* arg);
@@ -30,6 +32,8 @@ private:
 	Thread* m_thread;
 
 	std::vector<std::pair<void (*)(void*), void*> > m_update_cb;
+
+	bool m_running;
 
 }; // TickThread
 

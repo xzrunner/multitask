@@ -9,21 +9,28 @@ static void*
 tick_thread_loop(void* arg)
 {
 	TickThread* tick = static_cast<TickThread*>(arg);
-	while (true)
+	while (tick->IsRunning())
 	{
 		tick->Run();
 		Thread::Delay(5);
 	}
+	return NULL;
 }
 
 TickThread::TickThread(ThreadPool* pool)
 	: m_pool(pool)
+	, m_thread(NULL)
+	, m_running(false)
 {
 	m_thread = new Thread(tick_thread_loop, this);
 }
 
 TickThread::~TickThread()
 {
+	{
+		mt::Lock lock(m_mutex);
+		m_running = false;
+	}
 	delete m_thread;
 }
 
