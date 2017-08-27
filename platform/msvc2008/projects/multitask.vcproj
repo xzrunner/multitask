@@ -146,6 +146,14 @@
 	</References>
 	<Files>
 		<File
+			RelativePath="..\..\..\source\CommonTask.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\include\multitask\CommonTask.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\source\Task.cpp"
 			>
 		</File>
@@ -167,6 +175,14 @@
 		</File>
 		<File
 			RelativePath="..\..\..\include\multitask\ThreadPool.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\source\TickThread.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\include\multitask\TickThread.h"
 			>
 		</File>
 	</Files>
