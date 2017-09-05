@@ -16,19 +16,15 @@ namespace mt
 class Task : private cu::Uncopyable, public cu::RefCountObj
 {
 public:
-	Task(unsigned int type);
+	Task();
 	virtual ~Task() {}
 
 	virtual void Run() = 0;
 	
-	unsigned int Type() const { return m_type; }
-
 	void SetNext(Task* next) { m_next = next; }
 	Task* GetNext() { return m_next; }
 
 private:
-	unsigned int m_type;
-
 	Task* m_next;
 
 }; // Task

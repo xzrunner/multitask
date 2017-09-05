@@ -6,8 +6,7 @@ namespace mt
 SafeTaskQueue CommonTask::m_freelist;
 
 CommonTask::CommonTask()
-	: mt::Task(TASK_TYPE)
-	, m_run_cb(NULL)
+	: m_run_cb(NULL)
 	, m_run_ud(NULL)
 {
 }

@@ -21,8 +21,6 @@ private:
 	void* m_run_ud;
 
 private:
-	static const unsigned int TASK_TYPE = 0;
-
 	static SafeTaskQueue m_freelist;
 
 }; // CommonTask

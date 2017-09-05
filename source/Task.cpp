@@ -8,9 +8,8 @@ namespace mt
 /* class Task                                                           */
 /************************************************************************/
 
-Task::Task(unsigned int type) 
-	: m_type(type)
-	, m_next(NULL) 
+Task::Task() 
+	: m_next(NULL) 
 {
 }
 
