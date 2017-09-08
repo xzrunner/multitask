@@ -104,4 +104,11 @@ Task* SafeTaskQueue::TryPop()
 	return ret;
 }
 
+bool SafeTaskQueue::Empty()
+{
+	mt::Lock lock(m_mutex);
+
+	return m_head == NULL;
+}
+
 }

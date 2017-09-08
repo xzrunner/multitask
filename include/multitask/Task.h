@@ -56,6 +56,8 @@ public:
  	void Push(Task* task);
  	Task* TryPop();
 
+	bool Empty();
+
 private:
 	Mutex m_mutex;
 
