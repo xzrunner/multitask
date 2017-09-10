@@ -1,11 +1,10 @@
 #ifndef _MULTITASK_TICK_THREAD_H_
 #define _MULTITASK_TICK_THREAD_H_
 
-#include "multitask/Thread.h"
-
 #include <CU_Uncopyable.h>
 
 #include <vector>
+#include <mutex>
 
 namespace mt
 {
@@ -28,8 +27,8 @@ public:
 private:
 	ThreadPool* m_pool;
 
-	Mutex m_mutex;
-	Thread* m_thread;
+	std::mutex m_mutex;
+	std::thread* m_thread;
 
 	std::vector<std::pair<void (*)(void*), void*> > m_update_cb;
 

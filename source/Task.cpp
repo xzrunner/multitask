@@ -1,5 +1,4 @@
 #include "multitask/Task.h"
-#include "multitask/Thread.h"
 
 namespace mt
 {
@@ -72,7 +71,7 @@ void SafeTaskQueue::Push(Task* task)
 		return;
 	}
 
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	task->AddReference();
 	if (m_tail) {
@@ -85,7 +84,7 @@ void SafeTaskQueue::Push(Task* task)
 
 Task* SafeTaskQueue::TryPop()
 {
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	if (!m_head) {
 		return NULL;
@@ -106,7 +105,7 @@ Task* SafeTaskQueue::TryPop()
 
 bool SafeTaskQueue::Empty()
 {
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	return m_head == NULL;
 }

@@ -1,5 +1,4 @@
 #include "multitask/ThreadPool.h"
-#include "multitask/Thread.h"
 #include "multitask/Task.h"
 
 #include <assert.h>
@@ -8,10 +7,7 @@ namespace mt
 {
 
 ThreadPool::ThreadPool()
-	: m_mutex()
-	, m_not_empty(m_mutex)
-	, m_not_full(m_mutex)
-	, m_max_queue_size(0)
+	: m_max_queue_size(0)
 	, m_running(false)
 {
 }
@@ -31,26 +27,26 @@ void ThreadPool::Run(Task* task)
 	} 
 	else 
 	{
-		mt::Lock lock(m_mutex);
+		std::unique_lock<std::mutex> lock(m_mutex);
 
 		while (IsFull()) {
-			m_not_full.Wait();
+			m_not_full.wait(lock);
 		}
 		assert(!IsFull());
 
 		task->AddReference();
 		m_queue.push_back(task);
 
-		m_not_empty.Notify();
+		m_not_empty.notify_one();
 	}
 }
 
 Task* ThreadPool::Take()
 {
-	mt::Lock lock(m_mutex);
+	std::unique_lock<std::mutex> lock(m_mutex);
 
 	while (m_queue.empty() && m_running) {
-		m_not_empty.Wait();
+		m_not_empty.wait(lock);
 	}
 	
 	Task* task = NULL;
@@ -61,7 +57,7 @@ Task* ThreadPool::Take()
 
 		task->RemoveReference();
 		if (m_max_queue_size > 0) {
-			m_not_full.Notify();
+			m_not_full.notify_one();
 		}
 	}
 	return task;
@@ -87,16 +83,16 @@ void ThreadPool::Start(int num_threads)
 	m_running = true;
 	m_threads.reserve(num_threads);
 	for (int i = 0; i < num_threads; ++i) {
-		m_threads.push_back(new Thread(thread_loop, this));
+		m_threads.push_back(new std::thread(thread_loop, this));
 	}
 }
 
 void ThreadPool::Stop()
 {
 	{
-		mt::Lock lock(m_mutex);
+		std::unique_lock<std::mutex> lock(m_mutex);
 		m_running = false;
-		m_not_empty.NotifyAll();
+		m_not_empty.notify_all();
 	}
 	for (int i = 0, n = m_threads.size(); i < n; ++i) {
 		delete m_threads[i];
@@ -105,7 +101,7 @@ void ThreadPool::Stop()
 
 size_t ThreadPool::QueueSize()
 {
-	mt::Lock lock(m_mutex);
+	std::unique_lock<std::mutex> lock(m_mutex);
 	return m_queue.size();
 }
 

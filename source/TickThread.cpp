@@ -12,7 +12,7 @@ tick_thread_loop(void* arg)
 	while (tick->IsRunning())
 	{
 		tick->Run();
-		Thread::Delay(5);
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 	return NULL;
 }
@@ -22,13 +22,13 @@ TickThread::TickThread(ThreadPool* pool)
 	, m_thread(NULL)
 	, m_running(true)
 {
-	m_thread = new Thread(tick_thread_loop, this);
+	m_thread = new std::thread(tick_thread_loop, this);
 }
 
 TickThread::~TickThread()
 {
 	{
-		mt::Lock lock(m_mutex);
+		std::lock_guard<std::mutex> lock(m_mutex);
 		m_running = false;
 	}
 	delete m_thread;
@@ -36,7 +36,7 @@ TickThread::~TickThread()
 
 void TickThread::Run()
 {
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	for (int i = 0, n = m_update_cb.size(); i < n; ++i) 
 	{
@@ -47,14 +47,14 @@ void TickThread::Run()
 
 void TickThread::RegisterUpdateCB(void (*update)(void* arg), void* arg)
 {
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	m_update_cb.push_back(std::make_pair(update, arg));
 }
 
 void TickThread::UnregisterUpdateCB(void (*update)(void* arg))
 {
-	mt::Lock lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	std::vector<std::pair<void (*)(void*), void*> >::iterator itr
 		= m_update_cb.begin();

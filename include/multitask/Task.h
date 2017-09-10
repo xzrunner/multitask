@@ -1,12 +1,11 @@
 #ifndef _MULTITASK_TASK_H_
 #define _MULTITASK_TASK_H_
 
-#include "multitask/Thread.h"
-
 #include <CU_Uncopyable.h>
 #include <CU_RefCountObj.h>
 
 #include <vector>
+#include <mutex>
 
 #include <stddef.h>
 
@@ -59,7 +58,7 @@ public:
 	bool Empty();
 
 private:
-	Mutex m_mutex;
+	std::mutex m_mutex;
 
 	Task *m_head, *m_tail;
 

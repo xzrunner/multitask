@@ -1,12 +1,11 @@
 #ifndef _MULTITASK_THREAD_POOL_H_
 #define _MULTITASK_THREAD_POOL_H_
 
-#include "multitask/Thread.h"
-
 #include <CU_Uncopyable.h>
 
 #include <deque>
 #include <vector>
+#include <mutex>
 
 namespace mt
 {
@@ -34,15 +33,15 @@ private:
 	bool IsFull() const;
 
 private:
-	mt::Mutex m_mutex;
+	std::mutex m_mutex;
 
-	mt::Condition m_not_empty;
-	mt::Condition m_not_full;
+	std::condition_variable m_not_empty;
+	std::condition_variable m_not_full;
 
 	std::deque<Task*> m_queue;
 	size_t m_max_queue_size;
 
-	std::vector<Thread*> m_threads;
+	std::vector<std::thread*> m_threads;
 
 	bool m_running;
 
