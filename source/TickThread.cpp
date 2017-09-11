@@ -19,10 +19,9 @@ tick_thread_loop(void* arg)
 
 TickThread::TickThread(ThreadPool* pool)
 	: m_pool(pool)
-	, m_thread(NULL)
+	, m_thread(tick_thread_loop, this)
 	, m_running(true)
 {
-	m_thread = new std::thread(tick_thread_loop, this);
 }
 
 TickThread::~TickThread()
@@ -31,7 +30,6 @@ TickThread::~TickThread()
 		std::lock_guard<std::mutex> lock(m_mutex);
 		m_running = false;
 	}
-	delete m_thread;
 }
 
 void TickThread::Run()

@@ -63,7 +63,7 @@ Task* ThreadPool::Take()
 	return task;
 }
 
-static void*
+static void
 thread_loop(void* arg)
 {
 	ThreadPool* pool = static_cast<ThreadPool*>(arg);
@@ -74,16 +74,14 @@ thread_loop(void* arg)
 			task->Run();
 		}
 	}
-	return NULL;
 }
 
 void ThreadPool::Start(int num_threads)
 {
 	assert(m_threads.empty());
 	m_running = true;
-	m_threads.reserve(num_threads);
 	for (int i = 0; i < num_threads; ++i) {
-		m_threads.push_back(new std::thread(thread_loop, this));
+		m_threads.push_back(std::thread(thread_loop, this));
 	}
 }
 
@@ -93,9 +91,6 @@ void ThreadPool::Stop()
 		std::unique_lock<std::mutex> lock(m_mutex);
 		m_running = false;
 		m_not_empty.notify_all();
-	}
-	for (int i = 0, n = m_threads.size(); i < n; ++i) {
-		delete m_threads[i];
 	}
 }
 

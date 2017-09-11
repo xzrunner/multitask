@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <mutex>
+#include <thread>
 
 namespace mt
 {
@@ -28,7 +29,7 @@ private:
 	ThreadPool* m_pool;
 
 	std::mutex m_mutex;
-	std::thread* m_thread;
+	std::thread m_thread;
 
 	std::vector<std::pair<void (*)(void*), void*> > m_update_cb;
 

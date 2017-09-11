@@ -46,7 +46,6 @@ private:
 
 }; // Task
 
-class Mutex;
 class SafeTaskQueue : private cu::Uncopyable
 {
 public:

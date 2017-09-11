@@ -6,6 +6,8 @@
 #include <deque>
 #include <vector>
 #include <mutex>
+#include <thread>
+#include <condition_variable>
 
 namespace mt
 {
@@ -41,7 +43,7 @@ private:
 	std::deque<Task*> m_queue;
 	size_t m_max_queue_size;
 
-	std::vector<std::thread*> m_threads;
+	std::vector<std::thread> m_threads;
 
 	bool m_running;
 
