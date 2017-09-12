@@ -4,8 +4,14 @@
 #include <CU_Uncopyable.h>
 
 #include <vector>
+#if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
+#include <mutex>
+#include <mingw.mutex.h>
+#include <mingw.thread.h>
+#else
 #include <mutex>
 #include <thread>
+#endif
 
 namespace mt
 {

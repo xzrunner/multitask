@@ -5,7 +5,12 @@
 #include <CU_RefCountObj.h>
 
 #include <vector>
+#if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
 #include <mutex>
+#include <mingw.mutex.h>
+#else
+#include <mutex>
+#endif
 
 #include <stddef.h>
 
