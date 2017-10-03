@@ -1,8 +1,8 @@
 #ifndef _MULTITASK_TASK_H_
 #define _MULTITASK_TASK_H_
 
-#include <CU_Uncopyable.h>
-#include <CU_RefCountObj.h>
+#include <cu/uncopyable.h>
+#include <cu/CU_RefCountObj.h>
 
 #include <vector>
 #if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)

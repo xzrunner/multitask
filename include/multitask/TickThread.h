@@ -1,7 +1,7 @@
 #ifndef _MULTITASK_TICK_THREAD_H_
 #define _MULTITASK_TICK_THREAD_H_
 
-#include <CU_Uncopyable.h>
+#include <cu/uncopyable.h>
 
 #include <vector>
 #if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
