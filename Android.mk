@@ -9,13 +9,11 @@ LOCAL_MODULE := multitask
 LOCAL_C_INCLUDES  := \
 
 LOCAL_C_INCLUDES  := \
+	${CLIB_PATH} \
 	${MULTITASK_SRC_PATH}/include \
-	${CU_SRC_PATH} \
 
 LOCAL_SRC_FILES := \
 	$(subst $(LOCAL_PATH)/,,$(shell find $(LOCAL_PATH) -name "*.cpp" -print)) \
-
-LOCAL_CPPFLAGS  := -std=c++11
 
 include $(BUILD_STATIC_LIBRARY)
 
