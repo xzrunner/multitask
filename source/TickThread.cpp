@@ -14,7 +14,7 @@ tick_thread_loop(void* arg)
 		tick->Run();
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
-	return NULL;
+	return nullptr;
 }
 
 TickThread::TickThread(ThreadPool* pool)

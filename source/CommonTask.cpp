@@ -6,8 +6,8 @@ namespace mt
 SafeTaskQueue CommonTask::m_freelist;
 
 CommonTask::CommonTask()
-	: m_run_cb(NULL)
-	, m_run_ud(NULL)
+	: m_run_cb(nullptr)
+	, m_run_ud(nullptr)
 {
 }
 
@@ -16,8 +16,8 @@ void CommonTask::Run()
 	if (m_run_cb) {
 		m_run_cb(m_run_ud);
 	}
-	m_run_cb = NULL;
-	m_run_ud = NULL;
+	m_run_cb = nullptr;
+	m_run_ud = nullptr;
 	m_freelist.Push(this);
 }
 

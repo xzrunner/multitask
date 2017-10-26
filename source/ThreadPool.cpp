@@ -49,7 +49,7 @@ Task* ThreadPool::Take()
 		m_not_empty.wait(lock);
 	}
 	
-	Task* task = NULL;
+	Task* task = nullptr;
 	if (!m_queue.empty()) 
 	{
 		task = m_queue.front();

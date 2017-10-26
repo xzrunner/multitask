@@ -8,7 +8,7 @@ namespace mt
 /************************************************************************/
 
 Task::Task() 
-	: m_next(NULL) 
+	: m_next(nullptr) 
 {
 }
 
@@ -17,8 +17,8 @@ Task::Task()
 /************************************************************************/
 
 TaskQueue::TaskQueue() 
-	: m_head(NULL)
-	, m_tail(NULL) 
+	: m_head(nullptr)
+	, m_tail(nullptr) 
 {
 }
 
@@ -45,11 +45,11 @@ void TaskQueue::Pop()
 
 	Task* task = m_head;
 	if (m_head == m_tail) {
-		m_head->SetNext(NULL);
-		m_head = m_tail = NULL;
+		m_head->SetNext(nullptr);
+		m_head = m_tail = nullptr;
 	} else {
 		Task* next = m_head->GetNext();
-		m_head->SetNext(NULL);
+		m_head->SetNext(nullptr);
 		m_head = next;
 	}
 	task->RemoveReference();
@@ -60,8 +60,8 @@ void TaskQueue::Pop()
 /************************************************************************/
 
 SafeTaskQueue::SafeTaskQueue()
-	: m_head(NULL)
-	, m_tail(NULL)
+	: m_head(nullptr)
+	, m_tail(nullptr)
 {
 }
 
@@ -87,16 +87,16 @@ Task* SafeTaskQueue::TryPop()
 	std::lock_guard<std::mutex> lock(m_mutex);
 
 	if (!m_head) {
-		return NULL;
+		return nullptr;
 	}
 
 	Task* ret = m_head;
 	if (m_head == m_tail) {
-		m_head->SetNext(NULL);
-		m_head = m_tail = NULL;
+		m_head->SetNext(nullptr);
+		m_head = m_tail = nullptr;
 	} else {
 		Task* next = m_head->GetNext();
-		m_head->SetNext(NULL);
+		m_head->SetNext(nullptr);
 		m_head = next;
 	}
 	ret->RemoveReference();
@@ -107,7 +107,7 @@ bool SafeTaskQueue::Empty()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
-	return m_head == NULL;
+	return m_head == nullptr;
 }
 
 }
