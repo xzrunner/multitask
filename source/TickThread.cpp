@@ -26,9 +26,8 @@ TickThread::TickThread(ThreadPool* pool)
 
 TickThread::~TickThread()
 {
-	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		m_running = false;
+	if (m_running) {
+		Stop();
 	}
 }
 
@@ -63,6 +62,15 @@ void TickThread::UnregisterUpdateCB(void (*update)(void* arg))
 			++itr;
 		}
 	}
+}
+
+void TickThread::Stop()
+{
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_running = false;
+	}
+	m_thread.join();
 }
 
 }

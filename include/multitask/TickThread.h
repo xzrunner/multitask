@@ -32,6 +32,9 @@ public:
 	void UnregisterUpdateCB(void (*update)(void* arg));
 
 private:
+	void Stop();
+
+private:
 	ThreadPool* m_pool;
 
 	std::mutex m_mutex;

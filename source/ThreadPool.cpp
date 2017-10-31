@@ -92,6 +92,9 @@ void ThreadPool::Stop()
 		m_running = false;
 		m_not_empty.notify_all();
 	}
+	for (auto& thread : m_threads) {
+		thread.join();
+	}
 }
 
 size_t ThreadPool::QueueSize()
