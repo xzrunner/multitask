@@ -103,6 +103,16 @@ size_t ThreadPool::QueueSize()
 	return m_queue.size();
 }
 
+int ThreadPool::QueryThreadIdx(std::thread::id id) const
+{
+	for (int i = 0, n = m_threads.size(); i < n; ++i) {
+		if (m_threads[i].get_id() == id) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 bool ThreadPool::IsFull() const
 {	
 	return m_max_queue_size > 0 && m_queue.size() >= m_max_queue_size;

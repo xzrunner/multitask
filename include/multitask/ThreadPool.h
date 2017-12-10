@@ -39,6 +39,8 @@ public:
 	void SetMaxQueueSize(int max_size) { m_max_queue_size = max_size; }
 	size_t QueueSize();
 
+	int QueryThreadIdx(std::thread::id id) const;
+
 private:
 	bool IsFull() const;
 
