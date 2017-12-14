@@ -42,6 +42,15 @@ void TickThread::Run()
 	}
 }
 
+void TickThread::Stop()
+{
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_running = false;
+	}
+	m_thread.join();
+}
+
 void TickThread::RegisterUpdateCB(void (*update)(void* arg), void* arg)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -62,15 +71,6 @@ void TickThread::UnregisterUpdateCB(void (*update)(void* arg))
 			++itr;
 		}
 	}
-}
-
-void TickThread::Stop()
-{
-	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		m_running = false;
-	}
-	m_thread.join();
 }
 
 }

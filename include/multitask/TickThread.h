@@ -27,12 +27,10 @@ public:
 	bool IsRunning() const { return m_running; }
 
 	void Run();
+	void Stop();
 
 	void RegisterUpdateCB(void (*update)(void* arg), void* arg);
 	void UnregisterUpdateCB(void (*update)(void* arg));
-
-private:
-	void Stop();
 
 private:
 	ThreadPool* m_pool;
