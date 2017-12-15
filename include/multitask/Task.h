@@ -1,16 +1,12 @@
 #ifndef _MULTITASK_TASK_H_
 #define _MULTITASK_TASK_H_
 
+#include "multitask/Thread.h"
+
 #include <cu/uncopyable.h>
 #include <cu/CU_RefCountObj.h>
 
 #include <vector>
-#if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
-#include <mutex>
-#include <mingw.mutex.h>
-#else
-#include <mutex>
-#endif
 
 #include <stddef.h>
 

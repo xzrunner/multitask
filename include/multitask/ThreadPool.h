@@ -1,21 +1,12 @@
 #ifndef _MULTITASK_THREAD_POOL_H_
 #define _MULTITASK_THREAD_POOL_H_
 
+#include "multitask/Thread.h"
+
 #include <cu/uncopyable.h>
 
 #include <deque>
 #include <vector>
-
-#if defined(__MINGW32__) && !defined(_GLIBCXX_HAS_GTHREADS)
-#include <mingw.thread.h>
-#include <mutex>
-#include <mingw.mutex.h>
-#include <mingw.condition_variable.h>
-#else
-#include <mutex>
-#include <thread>
-#include <condition_variable>
-#endif
 
 namespace mt
 {
