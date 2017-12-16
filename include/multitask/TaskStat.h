@@ -33,6 +33,9 @@ public:
 
 	const CU_VEC<Task>& GetAllTasks() const { return m_tasks; }
 
+	uint32_t GetTimeMin() const { return m_time_min; }
+	uint32_t GetTimeMax() const { return m_time_max; }
+
 public:
 	class Checkpoint
 	{
@@ -59,15 +62,13 @@ private:
 	};
 
 private:
-	void FormatResult() const;
-	void PrintScreen() const;
-
-private:
 	std::mutex m_mutex;
 
 	CU_VEC<Task> m_tasks;
 
 	CU_MAP<CU_STR, TaskType> m_types;
+
+	uint32_t m_time_min, m_time_max;
 
 	CU_SINGLETON_DECLARATION(TaskStat);
 
