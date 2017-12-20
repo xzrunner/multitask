@@ -7,6 +7,7 @@
 
 #include <deque>
 #include <vector>
+#include <atomic>
 
 namespace mt
 {
@@ -46,7 +47,7 @@ private:
 
 	std::vector<std::thread> m_threads;
 
-	bool m_running;
+	std::atomic<bool> m_running;
 
 }; // ThreadPool
 

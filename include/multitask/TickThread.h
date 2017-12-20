@@ -6,6 +6,7 @@
 #include <cu/uncopyable.h>
 
 #include <vector>
+#include <atomic>
 
 namespace mt
 {
@@ -34,7 +35,7 @@ private:
 
 	std::vector<std::pair<void (*)(void*), void*> > m_update_cb;
 
-	bool m_running;
+	std::atomic<bool> m_running;
 
 }; // TickThread
 
