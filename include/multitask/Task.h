@@ -20,7 +20,7 @@ public:
 	virtual ~Task() {}
 
 	virtual void Run() = 0;
-	
+
 	void SetNext(Task* next) { m_next = next; }
 	Task* GetNext() { return m_next; }
 
@@ -35,7 +35,7 @@ public:
 	TaskQueue();
 
 	bool Empty() const { return !m_head; }
-	
+
 	Task* Front() { return m_head; }
 
 	void Push(Task* task);
@@ -51,7 +51,7 @@ class SafeTaskQueue : private cu::Uncopyable
 {
 public:
 	SafeTaskQueue();
-	
+
  	void Push(Task* task);
  	Task* TryPop();
 

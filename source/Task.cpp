@@ -7,8 +7,8 @@ namespace mt
 /* class Task                                                           */
 /************************************************************************/
 
-Task::Task() 
-	: m_next(nullptr) 
+Task::Task()
+	: m_next(nullptr)
 {
 }
 
@@ -16,9 +16,9 @@ Task::Task()
 /* class TaskQueue                                                      */
 /************************************************************************/
 
-TaskQueue::TaskQueue() 
+TaskQueue::TaskQueue()
 	: m_head(nullptr)
-	, m_tail(nullptr) 
+	, m_tail(nullptr)
 {
 }
 
@@ -79,7 +79,7 @@ void SafeTaskQueue::Push(Task* task)
 		m_tail = task;
 	} else {
 		m_head = m_tail = task;
-	} 
+	}
 }
 
 Task* SafeTaskQueue::TryPop()

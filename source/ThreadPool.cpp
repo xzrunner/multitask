@@ -21,11 +21,11 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::Run(Task* task)
 {
-	if (m_threads.empty()) 
+	if (m_threads.empty())
 	{
 		task->Run();
-	} 
-	else 
+	}
+	else
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
 
@@ -48,9 +48,9 @@ Task* ThreadPool::Take()
 	while (m_queue.empty() && m_running) {
 		m_not_empty.wait(lock);
 	}
-	
+
 	Task* task = nullptr;
-	if (!m_queue.empty()) 
+	if (!m_queue.empty())
 	{
 		task = m_queue.front();
 		m_queue.pop_front();
@@ -114,7 +114,7 @@ int ThreadPool::QueryThreadIdx(std::thread::id id) const
 }
 
 bool ThreadPool::IsFull() const
-{	
+{
 	return m_max_queue_size > 0 && m_queue.size() >= m_max_queue_size;
 }
 

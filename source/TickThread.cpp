@@ -5,7 +5,7 @@
 namespace mt
 {
 
-static void* 
+static void*
 tick_thread_loop(void* arg)
 {
 	TickThread* tick = static_cast<TickThread*>(arg);
@@ -35,10 +35,10 @@ void TickThread::Run()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
-	for (int i = 0, n = m_update_cb.size(); i < n; ++i) 
+	for (int i = 0, n = m_update_cb.size(); i < n; ++i)
 	{
 		CommonTask* task = CommonTask::Create(m_update_cb[i].first, m_update_cb[i].second);
-		m_pool->Run(task);	
+		m_pool->Run(task);
 	}
 }
 
